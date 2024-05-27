@@ -1,17 +1,8 @@
-FROM busybox:1.35
+FROM httpd:2.4
 
-RUN adduser -D stud
-USER stud
-WORKDIR /home/stud
+COPY ./src/ /usr/local/apache2/htdocs/
+ARG IP=user3148951backend.us-east-1.elasticbeanstalk.com
 
-COPY src/ .
-COPY entrypoint.sh .
+RUN sed -i "s/localhost:8080/$IP/g" /usr/local/apache2/htdocs/js/script.js
 
-USER root
-RUN chown -R stud:stud .
-USER stud
-
-EXPOSE 8000
-
-ENTRYPOINT ["./entrypoint.sh"]
-CMD ["httpd", "-f", "-v", "-p", "8000"]
+EXPOSE 80

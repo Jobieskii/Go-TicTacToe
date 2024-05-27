@@ -1,0 +1,7 @@
+{
+	"AWSEBDockerrunVersion": "1",
+	"Logging": "/tmp/backend-tick-tac-toe",
+	"Image": {
+		"Update": "false"
+	}
+}

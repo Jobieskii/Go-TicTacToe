@@ -1,17 +1,25 @@
-var turn = -1;
-
-const urlParams = new URLSearchParams(window.location.search);
-const username = urlParams.get('login');
-
-const usernameBanner = document.getElementById('userLogin');
-usernameBanner.innerHTML = username;
-
-const socket = new WebSocket("ws://localhost:8080/" + username);
-
-socket.addEventListener("message", handleMessage);
-
 const messages = document.getElementById('messages');
 const turnIndicator = document.getElementById('turnIndicator');
+
+if (!document.cookie.includes("access_token")) {
+    messages.append('Error: Not logged in.');
+    document.onclick(e=>document.location='/')
+}
+const access_token = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("access_token="))
+  ?.split("=")[1];
+const id_token = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("id_token="))
+  ?.split("=")[1];
+
+const socket = new WebSocket("ws://localhost:8080");
+
+socket.addEventListener("message", handleMessage);
+socket.onopen = (ev) => socket.send('token: '+access_token)
+
+var turn = -1;
 var player = -1;
 var opponentUsername = '';
 

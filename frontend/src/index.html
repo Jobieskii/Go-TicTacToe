@@ -7,19 +7,44 @@
     <title>Document</title>
     <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
 <div class="text-center" id="box">
     <header>
         <h1>Play Tic Tac Toe</h1>
     </header>
-    <form action="game.html" method="get">
-        <input id="login" name="login" placeholder="Place a login here">
-        <input type="submit" value="Play">
-    </form>
+    <div id="preLogin">
+        <a href="https://user3148951tic-tac-toe.auth.us-east-1.amazoncognito.com/login?response_type=token&client_id=6e4foh7nknnd4qsmen8rc5vr9l&redirect_uri=https%3A%2F%2Fuser3148951frontend.us-east-1.elasticbeanstalk.com%2Flogin%2F">Login using AWS Cognito</a>
+    </div>
+    <div id="postLogin" style="display: none;">
+        <h1 id="greeter"></h1>
+        <a href="/game/">Find a game</a>
+    </div>
     <div id="message"></div>
-
 </div>
 </body>
+<script>
+if (document.cookie.includes("access_token")) {
+    
+const access_token = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("access_token="))
+  ?.split("=")[1];
+const id_token = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("id_token="))
+  ?.split("=")[1];
+
+document.getElementById('preLogin').style.display = 'none';
+document.getElementById('postLogin').style.display = 'block';
+fetch("https://user3148951tic-tac-toe.auth.us-east-1.amazoncognito.com/oauth2/userInfo", {
+    headers: {
+        "Content-Type": "application/x-amz-json-1.1",
+        "Authorization": `Bearer ${access_token}`
+    }
+}).then(e =>  e.json().then(f => document.getElementById('greeter').innerHTML = 'Hello, ' +f['username']))
+.catch(e => {document.getElementById('message').append(e); document.cookie = ''})
+}
+</script>
 </html>
