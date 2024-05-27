@@ -15,7 +15,7 @@
         <h1>Play Tic Tac Toe</h1>
     </header>
     <div id="preLogin">
-        <a href="https://user3148951tic-tac-toe.auth.us-east-1.amazoncognito.com/login?response_type=token&client_id=6e4foh7nknnd4qsmen8rc5vr9l&redirect_uri=https%3A%2F%2Fuser3148951frontend.us-east-1.elasticbeanstalk.com%2Flogin%2F">Login using AWS Cognito</a>
+        <a href="%DOMAIN%/login?response_type=token&client_id=%CLIENT%&redirect_uri=https%3A%2F%2Fuser3148951frontend.us-east-1.elasticbeanstalk.com%2Flogin%2F">Login using AWS Cognito</a>
     </div>
     <div id="postLogin" style="display: none;">
         <h1 id="greeter"></h1>
@@ -38,7 +38,7 @@ const id_token = document.cookie
 
 document.getElementById('preLogin').style.display = 'none';
 document.getElementById('postLogin').style.display = 'block';
-fetch("https://user3148951tic-tac-toe.auth.us-east-1.amazoncognito.com/oauth2/userInfo", {
+fetch("%DOMAIN%/oauth2/userInfo", {
     headers: {
         "Content-Type": "application/x-amz-json-1.1",
         "Authorization": `Bearer ${access_token}`

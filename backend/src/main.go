@@ -5,6 +5,7 @@ import (
 	"log"
 	"me/tic-tac-toe/game"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
@@ -44,7 +45,7 @@ func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func validate(b []byte) (string, error) {
 	client := http.DefaultClient
 
-	req, _ := http.NewRequest("GET", "https://user3148951tic-tac-toe.auth.us-east-1.amazoncognito.com/oauth2/userInfo", nil)
+	req, _ := http.NewRequest("GET", os.Getenv("DOMAIN")+"/oauth2/userInfo", nil)
 	// ...
 	req.Header.Add("Content-Type", "application/x-amz-json-1.1")
 	req.Header.Add("Authorization", "Bearer "+string(b))

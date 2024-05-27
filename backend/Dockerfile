@@ -10,4 +10,6 @@ RUN go build -o tic-tac-toe
 
 EXPOSE 8080
 
+ENV DOMAIN=aaa
+
 CMD [ "./tic-tac-toe" ]

@@ -69,6 +69,60 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
   from_port         = 22
   to_port           = 22
 }
+
+##### COGNITO CONFIGURATION
+
+resource "aws_cognito_user_pool_client" "client" {
+  name                                 = "tic-tac-toe-terra-client"
+  user_pool_id                         = aws_cognito_user_pool.pool.id
+  callback_urls                        = ["https://user3148951frontend.us-east-1.elasticbeanstalk.com/login/"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["code", "implicit"]
+  allowed_oauth_scopes                 = ["email", "openid"]
+  explicit_auth_flows                  = ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_USER_SRP_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
+  supported_identity_providers         = ["COGNITO"]
+  depends_on = [
+    aws_cognito_user_pool.pool
+  ]
+}
+
+resource "aws_cognito_user_pool" "pool" {
+  name = "tic-tac-toe-terra"
+
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+  auto_verified_attributes = ["email"]
+
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
+  schema {
+    name = "email"
+    developer_only_attribute = false
+    mutable                  = true
+    attribute_data_type = "String"
+    required = true
+    string_attribute_constraints {
+      max_length = 50
+      min_length = 1
+    }
+  }
+}
+
+resource "aws_cognito_user_pool_domain" "main" {
+  domain          = "user3148951tictactoe-terra"
+  user_pool_id    = aws_cognito_user_pool.pool.id
+}
+resource "aws_cognito_resource_server" "resource" {
+  user_pool_id = aws_cognito_user_pool.pool.id
+  identifier = "user3148951tictactoe-terra-rs"
+  name       = "user3148951tictactoe-terra-rs"
+}
+
 ##### APPLICATION CONFIGURATION
 
 resource "aws_s3_bucket" "default" {
@@ -111,6 +165,11 @@ resource "aws_elastic_beanstalk_environment" "backend-env-v1" {
   cname_prefix = "user3148951backend"
   solution_stack_name = "64bit Amazon Linux 2023 v4.3.1 running Docker"
    setting {
+     namespace = "aws:elasticbeanstalk:application:environment"
+     name = "DOMAIN"
+     value = "https://${aws_cognito_user_pool_domain.main.domain}.auth.us-east-1.amazoncognito.com"
+   }
+   setting {
      namespace = "aws:ec2:vpc"
      name = "VPCId"
      value = aws_vpc.a5_vpc.id
@@ -152,7 +211,8 @@ resource "aws_elastic_beanstalk_environment" "backend-env-v1" {
   }
   depends_on = [
    aws_elastic_beanstalk_application.tic-tac-toe-back,
-   aws_elastic_beanstalk_application_version.tic-tac-toe-back
+   aws_elastic_beanstalk_application_version.tic-tac-toe-back,
+   aws_cognito_user_pool_client.client
   ]
 }
 
@@ -177,7 +237,16 @@ resource "aws_elastic_beanstalk_environment" "frontend-env-v1" {
   version_label = "tic-tac-toe-front-v1"
   cname_prefix = "user3148951frontend"
   solution_stack_name = "64bit Amazon Linux 2023 v4.3.1 running Docker"
-
+  setting {
+     namespace = "aws:elasticbeanstalk:application:environment"
+     name = "DOMAIN"
+     value = "https://${aws_cognito_user_pool_domain.main.domain}.auth.us-east-1.amazoncognito.com"
+   }
+   setting {
+     namespace = "aws:elasticbeanstalk:application:environment"
+     name = "CLIENTID"
+     value = aws_cognito_user_pool_client.client.id
+   }
    setting {
      namespace = "aws:ec2:vpc"
      name = "VPCId"
@@ -226,6 +295,7 @@ resource "aws_elastic_beanstalk_environment" "frontend-env-v1" {
   depends_on = [
    aws_elastic_beanstalk_application.tic-tac-toe-front,
    aws_elastic_beanstalk_application_version.tic-tac-toe-front,
-   aws_security_group.allow_ssh_http
+   aws_security_group.allow_ssh_http,
+   aws_cognito_user_pool_client.client
   ]
 }
