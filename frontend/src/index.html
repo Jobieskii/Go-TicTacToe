@@ -43,8 +43,17 @@ fetch("%DOMAIN%/oauth2/userInfo", {
         "Content-Type": "application/x-amz-json-1.1",
         "Authorization": `Bearer ${access_token}`
     }
-}).then(e =>  e.json().then(f => document.getElementById('greeter').innerHTML = 'Hello, ' +f['username']))
-.catch(e => {document.getElementById('message').append(e); document.cookie = ''})
+}).then(e =>  e.json())
+.then(f => {
+    document.getElementById('greeter').innerHTML = 'Hello, ' +f['username']
+    if (f['error']) {
+        document.getElementById('message').append(f['error'] + " PLEASE REFRESH THE PAGE"); eraseCookie('access_token') 
+    }
+})
 }
+function eraseCookie(name) {   
+    document.cookie = name+'=; Max-Age=-99999999;';  
+}
+
 </script>
 </html>
