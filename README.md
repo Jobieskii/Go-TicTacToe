@@ -1,9 +1,3 @@
-# Maurycy Jakiel - Cognito, TicTacToe report
-
-- Course: *Cloud programming*
-- Group: Tue 11:15
-- Date: 28.05.2024
-
 ## Environment architecture
 
 Modified frontend and backend source bundles are in their respective directories. They are zipped using the build/build.sh script. Afterwards terraform deploys them using Elastic Beanstalk. Frontend is given additional .ebextensions and hooks to setup https for it.
